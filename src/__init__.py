@@ -3,6 +3,7 @@ import markdown
 import shelve
 import uuid
 import src.gwent_objects as gwent_objects
+import src.request_helper as request_helper
 from flask import Flask, g
 from flask_restful import Resource, Api, reqparse
 from urllib.parse import unquote
@@ -83,16 +84,7 @@ class CardList(Resource):
     def post(self):
         parser = reqparse.RequestParser()
 
-        parser.add_argument('name', required=True)
-        parser.add_argument('card_type', required=True)
-        parser.add_argument('ability', required=True)
-        parser.add_argument('description', required=True)
-        parser.add_argument('row', required=True)
-        parser.add_argument('strength', required=True)
-        parser.add_argument('faction', required=True)
-        parser.add_argument('quantity', required=True)
-
-        args = parser.parse_args()
+        args = request_helper.helper.parse_request(parser)
 
         return validate(args, False, args['name'])        
 
@@ -100,7 +92,7 @@ class CardItem(Resource):
     def get(self, name):
         shelf = get_cards()    
 
-        if not (name in shelf):
+        if not request_helper.helper.validate_card_name(shelf, name):
             return {'message' : 'card not found', 'data' : {}}, 404
         
         return {'message' : 'card found', 'data' : shelf[name]}, 200
@@ -108,8 +100,8 @@ class CardItem(Resource):
     def delete(self, name):
         shelf = get_cards()
 
-        if not (name in shelf):
-            return {'message' : 'card not found', 'data' : shelf[name]}, 404
+        if not request_helper.helper.validate_card_name(shelf, name):
+            return {'message' : 'delete failed - card not found', 'data' : shelf[name]}, 404
 
         del shelf[name]
         return {'message' : 'card deleted'}, 204
@@ -117,21 +109,11 @@ class CardItem(Resource):
     def put(self, name):
         shelf = get_cards()
 
-        if not (name in shelf):
-            return {'message' : 'card not found', 'data' : shelf[name]}, 404
+        if not request_helper.helper.validate_card_name(shelf, name):
+            return {'message' : 'update failed - card not found', 'data' : shelf[name]}, 404
         
         parser = reqparse.RequestParser()
-
-        parser.add_argument('name', required=True)
-        parser.add_argument('card_type', required=True)
-        parser.add_argument('ability', required=True)
-        parser.add_argument('description', required=True)
-        parser.add_argument('row', required=True)
-        parser.add_argument('strength', required=True)
-        parser.add_argument('faction', required=True)
-        parser.add_argument('quantity', required=True)
-
-        args = parser.parse_args()
+        args = request_helper.helper.parse_request(parser)
 
         return validate(args, True, name)
     
