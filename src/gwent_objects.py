@@ -1,3 +1,22 @@
+from enum import Enum
+
+class Row(Enum):
+    melee = 1
+    ranged = 2
+    siege = 3
+
+class Faction(Enum):
+    monster = 1
+    northernrealms = 2
+    neutral = 3
+    nilfgaard = 4
+    scoiatael = 5
+
+class Type(Enum):
+    unit = 1
+    effect = 2
+    hero = 3
+
 class Card(object):
     identifier = None
     name = None

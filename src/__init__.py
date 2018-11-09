@@ -2,30 +2,13 @@ import os
 import markdown
 import shelve
 import uuid
+import src.gwent_objects as gwent_objects
 from flask import Flask, g
 from flask_restful import Resource, Api, reqparse
-from enum import Enum
 from urllib.parse import unquote
 
 app = Flask(__name__)
 api = Api(app)
-
-class Row(Enum):
-    melee = 1
-    ranged = 2
-    siege = 3
-
-class Faction(Enum):
-    monster = 1
-    northernrealms = 2
-    neutral = 3
-    nilfgaard = 4
-    scoiatael = 5
-
-class Type(Enum):
-    unit = 1
-    effect = 2
-    hero = 3
 
 def get_cards():
     kvp = getattr(g, '_database', None)
@@ -46,19 +29,19 @@ def validate(argument, is_update, name):
     # string get rid of these magic ints - Enum.Max or Enum.Min or something like that?
     card_type = argument['card_type']
     if card_type != 'null':
-        card_type_value = Type[card_type].value
+        card_type_value = gwent_objects.Type[card_type].value
         if card_type_value > 3 or card_type_value < 1:
             return {'message' : 'Error', 'data' : 'Card type ' + card_type + 'is not valid'}, 400
 
     faction = argument['faction']
     if faction != 'null':
-        faction_value = Faction[faction].value
+        faction_value = gwent_objects.Faction[faction].value
         if faction_value > 5 or faction_value < 1:
             return {'message' : 'Error', 'data' : 'Card faction ' + faction + 'is not valid'}, 400
 
     row = argument['row']
     if row != 'null':
-        row_value = Row[row].value
+        row_value = gwent_objects.Row[row].value
         if row_value > 3 or row_value < 1:
             return {'message' : 'Error', 'data' : 'Row value ' + row + 'is not valid'}, 400
 
