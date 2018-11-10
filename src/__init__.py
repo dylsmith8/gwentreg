@@ -101,9 +101,21 @@ class CardItem(Resource):
         shelf = get_cards()
 
         if not request_helper.helper.validate_card_name(shelf, name):
-            return {'message' : 'delete failed - card not found', 'data' : shelf[name]}, 404
+            return {'message' : 'delete failed - card not found', 'data' : name}, 404
 
-        del shelf[name]
+        current_card = shelf[name]
+        quantity = current_card['quantity']
+
+        q = int(quantity)
+
+        if q > 0:
+            q = q - 1
+            if q == 0:
+                del shelf[name]
+            else:
+                current_card['quantity'] = q
+                shelf[name] = current_card        
+
         return {'message' : 'card deleted'}, 204
     
     def put(self, name):
